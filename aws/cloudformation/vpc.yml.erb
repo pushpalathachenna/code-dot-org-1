@@ -136,7 +136,7 @@ Resources:
   FrontendSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Inbound HTTP[S] from load balancer, SSH from Gateway.
+      GroupDescription: Inbound HTTP[S] from load balancer, SSH from Daemon.
       VpcId: {Ref: VPC}
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -147,10 +147,6 @@ Resources:
           FromPort: 443
           ToPort: 443
           SourceSecurityGroupId: {Ref: ELBSecurityGroup}
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          SourceSecurityGroupId: {Ref: GatewaySecurityGroup}
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
@@ -188,22 +184,14 @@ Resources:
   DBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: MySQL access to/from frontends, gateway, or other DB instances.
+      GroupDescription: MySQL access to/from frontends or other DB instances.
       VpcId: {Ref: VPC}
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306
-          SourceSecurityGroupId: {Ref: GatewaySecurityGroup}
-        - IpProtocol: tcp
-          FromPort: 3306
-          ToPort: 3306
           SourceSecurityGroupId: {Ref: FrontendSecurityGroup}
       SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 3306
-          ToPort: 3306
-          DestinationSecurityGroupId: {Ref: GatewaySecurityGroup}
         - IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306
@@ -282,10 +270,6 @@ Outputs:
     Description: VPC ID
     Value: {Ref: VPC}
     Export: {Name: !Sub "${AWS::StackName}"}
-  GatewaySecurityGroup:
-    Description: Security group for Gateway bastion server
-    Value: {'Fn::GetAtt': [GatewaySecurityGroup, GroupId]}
-    Export: {Name: !Sub "${AWS::StackName}-GatewaySecurityGroup"}
   ELBSecurityGroup:
     Description: Security group for Load Balancer
     Value: {'Fn::GetAtt': [ELBSecurityGroup, GroupId]}
